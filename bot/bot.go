@@ -10,26 +10,25 @@ import (
 )
 
 type Bot struct {
-    conn net.Conn
+    Conn net.Conn
 }
 
-func (b Bot) Connect(host string) {
+func (b *Bot) Connect(host string) {
     conn, err := net.Dial("tcp", host)
     checkError(err)
-    b.conn = conn
+    b.Conn = conn
 }
 
-func (b Bot) Auth() int {
-    b.conn.Write([]byte("USER testbot testbot yourmom.com :testbot\n"))
+func (b Bot) Auth() {
+    b.Conn.Write([]byte("USER testbot testbot yourmom.com :testbot\n"))
     time.Sleep(2)
-    b.conn.Write([]byte("NICK testbot\n"))
+    b.Conn.Write([]byte("NICK testbot\n"))
     time.Sleep(2)
-    b.conn.Write([]byte("PRIVMSG nickserv identify somepassword"))
-    return 0
+    b.Conn.Write([]byte("PRIVMSG nickserv identify somepassword"))
 }
 
 func (b Bot) Listen() {
-    socketListener := bufio.NewReader(b.conn) // *bufio.Reader
+    socketListener := bufio.NewReader(b.Conn) // *bufio.Reader
     for {
         msg, err := socketListener.ReadString('\n')
         fmt.Println(strings.TrimSpace(msg))
@@ -42,7 +41,7 @@ func (b Bot) Listen() {
 }
 
 func (b Bot) Send(msg string) {
-    b.conn.Write([]byte(msg))
+    b.Conn.Write([]byte(msg))
 }
 
 func checkError(err error) {
