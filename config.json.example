@@ -1,0 +1,9 @@
+{
+    "Server": "127.0.0.1:6667",
+    "Nick": "TestBot",
+    "Ident": "Your",
+    "Hostmask": "mom.com",
+    "NSPassword": "testpassword",
+    "Channels": ["#test", "#test2"],
+    "Commands": {"testcommand": "testvalue"}
+}
