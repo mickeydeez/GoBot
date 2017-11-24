@@ -21,8 +21,13 @@ type Bot struct {
 }
 
 type Config struct {
-    Hostname string
+    Server string
+    Nick string
+    Ident string
+    Hostmask string
+    NSPassword string
     Channels []string
+    Commands map[string]string
 }
 
 func InitBot(jsonFile string) Bot {
@@ -42,15 +47,21 @@ func InitBot(jsonFile string) Bot {
 }
 
 func (b *Bot) Connect() {
-    conn, err := net.Dial("tcp", b.config.Hostname)
+    conn, err := net.Dial("tcp", b.config.Server)
     checkError(err)
     b.Conn = conn
 }
 
 func (b Bot) Auth() {
-    user_cmd := fmt.Sprintf("%s testbot testbot yourmom.com :testbot", b.user_cmd)
-    nick_cmd := fmt.Sprintf("%s testbot", b.nick_cmd)
-    id_cmd := fmt.Sprintf("%s nickserv identify somepassword", b.privmsg)
+    user_cmd := fmt.Sprintf(
+        "%s %s %s %s :%s",
+        b.user_cmd,
+        b.config.Ident,
+        b.config.Ident,
+        b.config.Hostmask,
+        b.config.Nick)
+    nick_cmd := fmt.Sprintf("%s %s", b.nick_cmd, b.config.Nick)
+    id_cmd := fmt.Sprintf("%s nickserv identify %s", b.privmsg, b.config.NSPassword)
     b.Send(user_cmd)
     time.Sleep(2)
     b.Send(nick_cmd)
