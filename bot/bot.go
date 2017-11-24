@@ -35,9 +35,7 @@ func InitBot(jsonFile string) Bot {
     var config Config
     file, _ := ioutil.ReadFile(jsonFile)
     err := json.Unmarshal(file, &config)
-    if err != nil {
-        fmt.Println("Configuration Error: ", err.Error())
-    }
+    checkError(err)
     bot.config = config
     bot.privmsg = "PRIVMSG"
     bot.nick_cmd = "NICK"
