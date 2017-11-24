@@ -13,8 +13,8 @@ func main() {
         os.Exit(1)
     }
     host := os.Args[1]
-    var client bot.Bot
-    client.Connect(host)
+    client := bot.InitBot(host)
+    client.Connect()
     client.Auth()
     go client.Listen()
     str := make(chan string) // chan string
