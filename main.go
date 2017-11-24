@@ -4,7 +4,7 @@ import (
     "bufio"
     "fmt"
     "os"
-    bot "./bot"
+    bot "github.com/mickeydeez/GoBot/bot"
 )
 
 func main() {
