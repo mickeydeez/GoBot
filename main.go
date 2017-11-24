@@ -3,7 +3,6 @@ package main
 import (
     "bufio"
     "fmt"
-    "net"
     "os"
     bot "./bot"
 )
@@ -14,9 +13,8 @@ func main() {
         os.Exit(1)
     }
     host := os.Args[1]
-    conn, err := net.Dial("tcp", host)
-    checkError(err)
-    client := bot.Bot{conn}
+    var client bot.Bot
+    client.Connect(host)
     client.Auth()
     go client.Listen()
     str := make(chan string) // chan string
@@ -35,9 +33,3 @@ func read_input(str chan string) {
     }
 }
 
-func checkError(err error) {
-    if err != nil {
-        fmt.Println("Fatal error ", err.Error())
-        os.Exit(1)
-    }
-}
