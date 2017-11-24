@@ -9,11 +9,11 @@ import (
 
 func main() {
     if len(os.Args) != 2 {
-        fmt.Println("Usage: ", os.Args[0], "host:port")
+        fmt.Println("Usage: ", os.Args[0], "<JSON Config>")
         os.Exit(1)
     }
-    host := os.Args[1]
-    client := bot.InitBot(host)
+    jsonFile := os.Args[1]
+    client := bot.InitBot(jsonFile)
     client.Connect()
     client.Auth()
     go client.Listen()

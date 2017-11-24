@@ -7,27 +7,42 @@ import (
     "net"
     "strings"
     "time"
+    "encoding/json"
+    "io/ioutil"
 )
 
 type Bot struct {
     Conn net.Conn
-    Host string
+    config Config
     privmsg string
     nick_cmd string
     user_cmd string
+    eof string
 }
 
-func InitBot(host string) Bot {
+type Config struct {
+    Hostname string
+    Channels []string
+}
+
+func InitBot(jsonFile string) Bot {
     bot := Bot{}
-    bot.Host = host
+    var config Config
+    file, _ := ioutil.ReadFile(jsonFile)
+    err := json.Unmarshal(file, &config)
+    if err != nil {
+        fmt.Println("Configuration Error: ", err.Error())
+    }
+    bot.config = config
     bot.privmsg = "PRIVMSG"
     bot.nick_cmd = "NICK"
     bot.user_cmd = "USER"
+    bot.eof = "EOF"
     return bot
 }
 
 func (b *Bot) Connect() {
-    conn, err := net.Dial("tcp", b.Host)
+    conn, err := net.Dial("tcp", b.config.Hostname)
     checkError(err)
     b.Conn = conn
 }
@@ -48,7 +63,7 @@ func (b Bot) Listen() {
     for {
         msg, err := socketListener.ReadString('\n')
         if err != nil {
-            if err.Error() == "EOF" {
+            if err.Error() == b.eof {
                 os.Exit(0)
             }
         }
@@ -70,7 +85,7 @@ func (b Bot) Send(msg string) {
 
 func checkError(err error) {
     if err != nil {
-        fmt.Println("Fatal error ", err.Error())
+        fmt.Println("Fatal error: ", err.Error())
         os.Exit(1)
     }
 }
