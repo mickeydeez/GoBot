@@ -4,6 +4,8 @@
     "Ident": "Your",
     "Hostmask": "mom.com",
     "NSPassword": "testpassword",
+    "Admins": ["faggot1", "faggot2"],
     "Channels": ["#test", "#test2"],
+    "CommandTrigger": "?",
     "Commands": {"testcommand": "testvalue"}
 }
