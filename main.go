@@ -15,8 +15,8 @@ func main() {
 	jsonFile := os.Args[1]
 	client := bot.InitBot(jsonFile)
 	client.Connect()
-	client.Auth()
 	go client.Listen()
+	client.Bootstrap()
 	str := make(chan string)
 	for {
 		go read_input(str)
