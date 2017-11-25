@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	urlparser "github.com/mickeydeez/GoBot/urlparser"
 	"io/ioutil"
 	"net"
 	"os"
@@ -131,7 +132,7 @@ func (b Bot) Send(msg string) {
 
 func (b Bot) ProcessEvent(event Event) {
 	if event.cmd == "PING" {
-		b.Pong(event.content[0][1:])
+		b.Pong(event.content[0])
 	} else if event.cmd == "JOIN" {
 		b.ProcessJoin(event)
 	} else if len(event.content) > 0 {
@@ -146,6 +147,7 @@ func (b Bot) ProcessEvent(event Event) {
 				b.Send(response)
 			} else {
 				fmt.Println(debug_out)
+				b.ProcessNonCommand(event)
 			}
 		}
 	}
@@ -157,6 +159,17 @@ func (b Bot) ProcessJoin(event Event) {
 		response := fmt.Sprintf("%s %s %s the badass has entered the room",
 			b.privmsg, event.dest[1:], nick)
 		b.Send(response)
+	}
+}
+
+func (b Bot) ProcessNonCommand(event Event) {
+	for _, word := range event.content {
+		if strings.HasPrefix(word, "http") {
+			response := parseUrl(word)
+			formatted := fmt.Sprintf("%s %s %s",
+				b.privmsg, event.dest, response)
+			b.Send(formatted)
+		}
 	}
 }
 
@@ -173,7 +186,7 @@ func (b Bot) CheckAdmin(event_src string) bool {
 
 func (b Bot) CheckCommand(event_content []string) (bool, string) {
 	// returns bool, command
-	if string(event_content[0][1]) == string(b.config.CommandTrigger) {
+	if string(event_content[0][0]) == string(b.config.CommandTrigger) {
 		for k, _ := range b.config.Commands {
 			if k == strings.Split(event_content[0], b.config.CommandTrigger)[1] {
 				return true, k
@@ -189,6 +202,19 @@ func parseSource(event_src string) (string, string, string) {
 	nick := split[0]
 	host_split := strings.Split(split[1], "@")
 	return nick, host_split[0], host_split[1]
+}
+
+func parseUrl(url string) string {
+	parser := urlparser.InitParser(url)
+	title := parser.Title()
+	domain := parser.RootDomain()
+	var response string
+	if len(title) > 0 {
+		response = fmt.Sprintf("Title: %s - (%s)",
+			title, domain)
+	}
+	return response
+
 }
 
 func checkError(err error) {
@@ -218,15 +244,19 @@ func ParseEvent(msg string) Event {
 		event.src = ""
 		event.dest = ""
 		event.cmd = words[0]
-		content = Extend(content, strings.Join(words[1:], " "))
+		content = Extend(content, words[1][1:])
 		event.content = content
 	} else {
 		event.src = words[0][1:]
 		event.cmd = words[1]
 		event.dest = words[2]
 		if len(words) >= 4 {
-			for _, item := range words[3:] {
-				content = Extend(content, item)
+			for index, item := range words[3:] {
+				if index == 0 && strings.HasPrefix(item, ":") {
+					content = Extend(content, item[1:])
+				} else {
+					content = Extend(content, item)
+				}
 			}
 		}
 		event.content = content
