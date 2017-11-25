@@ -107,9 +107,6 @@ func (b Bot) Auth() {
 
 func (b Bot) Listen() {
 	socketListener := bufio.NewReader(b.Conn)
-	for _, item := range b.config.Courses {
-		fmt.Println(item["desc"])
-	}
 	for {
 		msg, err := socketListener.ReadString('\n')
 		if err != nil {
